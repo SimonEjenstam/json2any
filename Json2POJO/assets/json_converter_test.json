@@ -1,0 +1,9 @@
+{
+	"name":"Car",
+	"id":"int",
+	"color":"string",
+	"taxRegistered":true,
+	"previousOwners": [
+		"string"
+	]
+}
