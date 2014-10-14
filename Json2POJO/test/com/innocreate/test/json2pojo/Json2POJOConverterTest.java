@@ -10,6 +10,8 @@ import org.junit.Test;
 import com.innocreate.json2pojo.Json2POJOConverter;
 
 public class Json2POJOConverterTest {
+	
+	private static final String TEST_ASSETS_PATH = "test_assets/";
 
 	@Test
 	public void initialisationTest() {
@@ -30,7 +32,7 @@ public class Json2POJOConverterTest {
 		
 		/* Supplied legal path */
 		try {
-			converter = new Json2POJOConverter("assets");
+			converter = new Json2POJOConverter(TEST_ASSETS_PATH);
 		} catch (IllegalArgumentException e) {
 			assertTrue(false);
 		}
@@ -46,7 +48,7 @@ public class Json2POJOConverterTest {
 	
 	@Test
 	public void readTest() {
-		Json2POJOConverter converter = new Json2POJOConverter();
+		Json2POJOConverter converter = new Json2POJOConverter(TEST_ASSETS_PATH);
 		File assetsDir = converter.getAssetsDir();
 		String test[] = assetsDir.list(new FilenameFilter() {
 			
@@ -62,6 +64,16 @@ public class Json2POJOConverterTest {
 		} else {
 			fail("The default assets folder must contain one file named 'json_converter_test.json'.");
 		}
+	}
+	
+	
+	@Test
+	public void convertTest() {
+		Json2POJOConverter converter = new Json2POJOConverter(TEST_ASSETS_PATH);
+		converter.readJSONFiles();
+		converter.convertJSONFiles();
+		File f = new File(converter.getAssetsDir(), "Car.java");
+		assertTrue(f.exists() && (System.currentTimeMillis() - f.lastModified()) < 1000);
 	}
 
 }

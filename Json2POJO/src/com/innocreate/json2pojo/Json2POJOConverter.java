@@ -3,10 +3,13 @@ package com.innocreate.json2pojo;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /***********************************************************************************************************************
@@ -39,6 +42,24 @@ import org.json.JSONObject;
  */
 public class Json2POJOConverter {
 	
+	
+	private static final String CLASS_NAME = "name";
+	
+	private static final String CLASS = "class";
+	
+	private static final String INTEGER = "int";
+	
+	private static final String LONG = "long";
+	
+	private static final String DOUBLE = "double";
+	
+	private static final String BOOLEAN = "boolean";
+	
+	private static final String STRING = "String";
+	
+	
+	
+	
 	private static final String DEFAULT_ASSETS_PATH = "assets/";
 	
 	private File mAssetsDir;
@@ -65,9 +86,9 @@ public class Json2POJOConverter {
 		}
 	}
 	
-	private JSONObject readJSONFile(String filename) {
-		JSONObject json = null;
+	private String readFile(String filename) {
 		FileInputStream fileIS = null;
+		String result = null;
 		try {
 			fileIS = new FileInputStream(new File(mAssetsDir, filename));
 			StringBuilder builder = new StringBuilder();
@@ -75,15 +96,25 @@ public class Json2POJOConverter {
 			while((ch = fileIS.read()) != -1){
 			    builder.append((char)ch);
 			}
-			json = new JSONObject(builder.toString()); 
+			result = builder.toString();
 			fileIS.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
-		return json;
-		
+		return result;
+	}
+	
+	private void writeFile(String filename, String data) {
+		FileOutputStream fileOS = null;
+		try {
+			fileOS = new FileOutputStream(new File(mAssetsDir, filename));
+			fileOS.write(data.getBytes("UTF-8"));
+			fileOS.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
 	}
 	
 	public void readJSONFiles() {
@@ -91,14 +122,93 @@ public class Json2POJOConverter {
 			
 			@Override
 			public boolean accept(File dir, String name) {				
-				return (!name.equalsIgnoreCase("json_converter_test.json") && name.endsWith(".json"));
+				return (name.endsWith(".json"));
 			}
 		});
 		
 		for(String filename : jsonFilenames) {
-			mJSONFiles.add(readJSONFile(filename));
+			mJSONFiles.add(new JSONObject(readFile(filename)));
 		}
 		
+	}
+	
+	private String unindent(String currentIndentation, int indentSize) {
+		if(currentIndentation.length() == 0) {
+			return "";
+		} else {
+			StringBuilder indentBuilder = new StringBuilder();
+			for(int i = 0; i < currentIndentation.length()+indentSize; i++) {
+				indentBuilder.append(' ');
+			}
+			return indentBuilder.toString();
+		}
+	}
+	
+	private String indent(String currentIndentation, int indentSize) {
+		StringBuilder indentBuilder = new StringBuilder();
+		for(int i = 0; i < currentIndentation.length()+indentSize; i++) {
+			indentBuilder.append(' ');
+		}
+		currentIndentation = indentBuilder.toString();
+		return currentIndentation;
+	}
+	
+	private String generatePOJO(String className, HashMap<String, String> fields) {
+		StringBuilder builder = new StringBuilder();
+		int indentSize = 4;
+		String currentIndentation = "";
+		
+		builder.append("import java.util.ArrayList;\n\n");
+		
+		builder.append("public class " + className + " {\n");
+		currentIndentation = indent(currentIndentation, indentSize);
+		builder.append(currentIndentation);
+		for(String fieldName : fields.keySet()) {
+			String type = fields.get(fieldName);
+			switch (type) {
+			case INTEGER:
+			case LONG:
+			case DOUBLE:
+			case BOOLEAN:
+			case CLASS:
+				builder.append("public " + type + " " + fieldName + ";\n" + currentIndentation);
+				break;
+			case STRING:
+				builder.append("public String " + fieldName + ";\n" + currentIndentation);
+				break;
+			}
+			
+		}
+		builder.delete(builder.length()-currentIndentation.length(), builder.length());
+		builder.append("}\n");
+		
+		return builder.toString();
+	}
+	
+	public void convertJSONFiles() {
+		for(JSONObject object : mJSONFiles) {
+			String names[] = JSONObject.getNames(object);
+			String className = null;
+			HashMap<String, String> fields = new HashMap<String, String>();
+			for(String name : names) {
+				switch(name) {
+				case CLASS_NAME:
+					className = object.optString(name);
+					className = Character.toUpperCase(className.charAt(0)) + className.substring(1);
+					break;
+				default:
+					fields.put(name, object.optString(name));
+					break;
+				}
+				
+			}
+			if(className != null) {
+				String pojoString = generatePOJO(className, fields);
+				writeFile(className + ".java ", pojoString);
+			} else {
+				new JSONException("The object must contain a '" + CLASS_NAME + "' field");
+			}
+		}
 	}
 	
 	public File getAssetsDir() {
