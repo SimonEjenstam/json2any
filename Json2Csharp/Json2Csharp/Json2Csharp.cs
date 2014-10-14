@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Json2Csharp
 {
-    class Program
+    class Json2Csharp
     {
         static void Main(string[] args)
         {
