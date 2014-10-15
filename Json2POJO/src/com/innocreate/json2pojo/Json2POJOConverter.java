@@ -204,7 +204,7 @@ public class Json2POJOConverter {
 			}
 			if(className != null) {
 				String pojoString = generatePOJO(className, fields);
-				writeFile(className + ".java ", pojoString);
+				writeFile(className + ".java", pojoString);
 			} else {
 				new JSONException("The object must contain a '" + CLASS_NAME + "' field");
 			}

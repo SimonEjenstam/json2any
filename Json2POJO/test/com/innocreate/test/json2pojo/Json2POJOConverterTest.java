@@ -72,8 +72,11 @@ public class Json2POJOConverterTest {
 		Json2POJOConverter converter = new Json2POJOConverter(TEST_ASSETS_PATH);
 		converter.readJSONFiles();
 		converter.convertJSONFiles();
-		File f = new File(converter.getAssetsDir(), "Car.java");
-		assertTrue(f.exists() && (System.currentTimeMillis() - f.lastModified()) < 1000);
+		File f = new File(converter.getAssetsDir().getAbsolutePath(), "Car.java");
+		boolean canRead = f.canRead();
+		boolean exists = f.exists();
+		boolean newFile = (System.currentTimeMillis() - f.lastModified()) < 1000;
+		assertTrue(canRead && exists && newFile);
 	}
 
 }
