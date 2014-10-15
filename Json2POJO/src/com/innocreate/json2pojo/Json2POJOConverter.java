@@ -137,7 +137,7 @@ public class Json2POJOConverter {
 			return "";
 		} else {
 			StringBuilder indentBuilder = new StringBuilder();
-			for(int i = 0; i < currentIndentation.length()+indentSize; i++) {
+			for(int i = 0; i < currentIndentation.length()-indentSize; i++) {
 				indentBuilder.append(' ');
 			}
 			return indentBuilder.toString();
@@ -153,16 +153,9 @@ public class Json2POJOConverter {
 		return currentIndentation;
 	}
 	
-	private String generatePOJO(String className, HashMap<String, String> fields) {
+	private String generateFields(HashMap<String, String> fields, String currentIndentation, int indentSize) {
 		StringBuilder builder = new StringBuilder();
-		int indentSize = 4;
-		String currentIndentation = "";
-		
-		builder.append("import java.util.ArrayList;\n\n");
-		
-		builder.append("public class " + className + " {\n");
 		currentIndentation = indent(currentIndentation, indentSize);
-		builder.append(currentIndentation);
 		for(String fieldName : fields.keySet()) {
 			String type = fields.get(fieldName);
 			switch (type) {
@@ -171,15 +164,83 @@ public class Json2POJOConverter {
 			case DOUBLE:
 			case BOOLEAN:
 			case CLASS:
-				builder.append("public " + type + " " + fieldName + ";\n" + currentIndentation);
+				builder.append(currentIndentation + "public " + type + " " + fieldName + ";\n\n");
 				break;
 			case STRING:
-				builder.append("public String " + fieldName + ";\n" + currentIndentation);
+				builder.append(currentIndentation + "public String " + fieldName + ";\n\n");
 				break;
 			}
 			
 		}
-		builder.delete(builder.length()-currentIndentation.length(), builder.length());
+		return builder.toString();
+	}
+	
+	private String generateAccessorsNMutators(HashMap<String, String> fields, String currentIndentation, int indentSize) {
+		StringBuilder builder = new StringBuilder();
+		currentIndentation = indent(currentIndentation, indentSize);
+		for(String fieldName : fields.keySet()) {
+			String type = fields.get(fieldName);
+			Character first = Character.toUpperCase(fieldName.charAt(0));
+			String rest = fieldName.substring(1);
+			switch (type) {
+			case INTEGER:
+			case LONG:
+			case DOUBLE:
+			case BOOLEAN:
+			case CLASS:
+				
+				/* Getter */
+				builder.append(currentIndentation + "public " + type + " get" + first + rest + "() {\n");
+				currentIndentation = indent(currentIndentation, indentSize);
+				builder.append(currentIndentation + "return " + fieldName + ";\n");
+				currentIndentation = unindent(currentIndentation, indentSize);
+				builder.append(currentIndentation + "}\n\n");
+				
+				/* Setter */
+				builder.append(currentIndentation + "public void set" + first + rest + "(" + type + " " + fieldName + ") {\n");
+				currentIndentation = indent(currentIndentation, indentSize);
+				builder.append(currentIndentation + "this." + fieldName + " = " + fieldName + ";\n");
+				currentIndentation = unindent(currentIndentation, indentSize);
+				builder.append(currentIndentation + "}\n\n");
+				
+				
+				break;
+			case STRING:
+				/* Getter */
+				builder.append(currentIndentation + "public String  get" + first + rest + "() {\n");
+				currentIndentation = indent(currentIndentation, indentSize);
+				builder.append(currentIndentation + "return " + fieldName + ";\n");
+				currentIndentation = unindent(currentIndentation, indentSize);
+				builder.append(currentIndentation + "}\n\n");
+				
+				/* Setter */
+				builder.append(currentIndentation + "public void set" + first + rest + "(String " + fieldName + ") {\n");
+				currentIndentation = indent(currentIndentation, indentSize);
+				builder.append(currentIndentation + "this." + fieldName + " = " + fieldName + ";\n");
+				currentIndentation = unindent(currentIndentation, indentSize);
+				builder.append(currentIndentation + "}\n\n");
+				break;
+			}
+			
+		}
+		return builder.toString();
+	}
+	
+	private String generatePOJO(String className, HashMap<String, String> fields) {
+		StringBuilder builder = new StringBuilder();
+		int indentSize = 4;
+		String currentIndentation = "";
+		
+		builder.append("import java.util.ArrayList;\n\n");
+		builder.append("public class " + className + " {\n\n");
+		
+		
+		String fieldString = generateFields(fields, currentIndentation, indentSize);
+		builder.append(fieldString);
+		
+		String getterSetterString = generateAccessorsNMutators(fields, currentIndentation, indentSize);
+		builder.append(getterSetterString);
+		
 		builder.append("}\n");
 		
 		return builder.toString();
