@@ -55,14 +55,14 @@ public class Json2POJOConverterTest {
 			@Override
 			public boolean accept(File dir, String name) {
 				// TODO Auto-generated method stub
-				return name.equalsIgnoreCase("json_converter_test.json");
+				return name.equalsIgnoreCase("json_converter_test_car.json");
 			}
 		});
 		if(test.length == 1) {
 			converter.readJSONFiles();
 			assertTrue(converter.getJSONFiles().size() > 0);
 		} else {
-			fail("The default assets folder must contain one file named 'json_converter_test.json'.");
+			fail("The default assets folder must contain one file named 'json_converter_test_car.json'.");
 		}
 	}
 	

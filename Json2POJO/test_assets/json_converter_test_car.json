@@ -1,5 +1,5 @@
 {
-	"name":"Car",
+	"class_name":"Car",
 	"id":"int",
 	"color":"String",
 	"weight":"double",

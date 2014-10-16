@@ -1,0 +1,9 @@
+{
+	"class_name":"Person",
+	"id":"int",
+	"name":"String",
+	"age":"int",
+	"height":"double",
+	"isMarried":"boolean",
+	"currentOwnerOf":"Car"
+}

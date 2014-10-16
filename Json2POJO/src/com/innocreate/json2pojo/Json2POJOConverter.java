@@ -43,9 +43,7 @@ import org.json.JSONObject;
 public class Json2POJOConverter {
 	
 	
-	private static final String CLASS_NAME = "name";
-	
-	private static final String CLASS = "class";
+	private static final String CLASS_NAME = "class_name";
 	
 	private static final String INTEGER = "int";
 	
@@ -158,19 +156,7 @@ public class Json2POJOConverter {
 		currentIndentation = indent(currentIndentation, indentSize);
 		for(String fieldName : fields.keySet()) {
 			String type = fields.get(fieldName);
-			switch (type) {
-			case INTEGER:
-			case LONG:
-			case DOUBLE:
-			case BOOLEAN:
-			case CLASS:
-				builder.append(currentIndentation + "public " + type + " " + fieldName + ";\n\n");
-				break;
-			case STRING:
-				builder.append(currentIndentation + "public String " + fieldName + ";\n\n");
-				break;
-			}
-			
+			builder.append(currentIndentation + "public " + type + " " + fieldName + ";\n\n");
 		}
 		return builder.toString();
 	}
@@ -182,46 +168,20 @@ public class Json2POJOConverter {
 			String type = fields.get(fieldName);
 			Character first = Character.toUpperCase(fieldName.charAt(0));
 			String rest = fieldName.substring(1);
-			switch (type) {
-			case INTEGER:
-			case LONG:
-			case DOUBLE:
-			case BOOLEAN:
-			case CLASS:
-				
-				/* Getter */
-				builder.append(currentIndentation + "public " + type + " get" + first + rest + "() {\n");
-				currentIndentation = indent(currentIndentation, indentSize);
-				builder.append(currentIndentation + "return " + fieldName + ";\n");
-				currentIndentation = unindent(currentIndentation, indentSize);
-				builder.append(currentIndentation + "}\n\n");
-				
-				/* Setter */
-				builder.append(currentIndentation + "public void set" + first + rest + "(" + type + " " + fieldName + ") {\n");
-				currentIndentation = indent(currentIndentation, indentSize);
-				builder.append(currentIndentation + "this." + fieldName + " = " + fieldName + ";\n");
-				currentIndentation = unindent(currentIndentation, indentSize);
-				builder.append(currentIndentation + "}\n\n");
-				
-				
-				break;
-			case STRING:
-				/* Getter */
-				builder.append(currentIndentation + "public String  get" + first + rest + "() {\n");
-				currentIndentation = indent(currentIndentation, indentSize);
-				builder.append(currentIndentation + "return " + fieldName + ";\n");
-				currentIndentation = unindent(currentIndentation, indentSize);
-				builder.append(currentIndentation + "}\n\n");
-				
-				/* Setter */
-				builder.append(currentIndentation + "public void set" + first + rest + "(String " + fieldName + ") {\n");
-				currentIndentation = indent(currentIndentation, indentSize);
-				builder.append(currentIndentation + "this." + fieldName + " = " + fieldName + ";\n");
-				currentIndentation = unindent(currentIndentation, indentSize);
-				builder.append(currentIndentation + "}\n\n");
-				break;
-			}
+
+			/* Getter */
+			builder.append(currentIndentation + "public " + type + " get" + first + rest + "() {\n");
+			currentIndentation = indent(currentIndentation, indentSize);
+			builder.append(currentIndentation + "return " + fieldName + ";\n");
+			currentIndentation = unindent(currentIndentation, indentSize);
+			builder.append(currentIndentation + "}\n\n");
 			
+			/* Setter */
+			builder.append(currentIndentation + "public void set" + first + rest + "(" + type + " " + fieldName + ") {\n");
+			currentIndentation = indent(currentIndentation, indentSize);
+			builder.append(currentIndentation + "this." + fieldName + " = " + fieldName + ";\n");
+			currentIndentation = unindent(currentIndentation, indentSize);
+			builder.append(currentIndentation + "}\n\n");
 		}
 		return builder.toString();
 	}
